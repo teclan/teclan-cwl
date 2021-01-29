@@ -34,6 +34,7 @@ public class SsqTest {
 
         HttpUtils.setHeaders(header);
 
+
         DBFactory.open();
     }
 
@@ -46,6 +47,7 @@ public class SsqTest {
     public void fetch() throws IOException {
 
         String url = "http://www.cwl.gov.cn/cwl_admin/kjxx/findDrawNotice?name=ssq&issueCount=100";
+
 
 
         JSONObject response = HttpUtils.get(url);
