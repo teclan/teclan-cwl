@@ -7,6 +7,7 @@ create table ssq (
 create table ssq_detail (
  `date` varchar(20) not null comment '日期',
  `code` varchar(10) not null comment '号码',
+ `order` int not null comment '位置',
  `color` varchar(10) not null comment 'red | blue',
  primary key (`date`,`code`,`color`)
 );
