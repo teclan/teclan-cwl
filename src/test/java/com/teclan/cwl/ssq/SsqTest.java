@@ -47,21 +47,21 @@ public class SsqTest {
     public void fetch() throws IOException {
 
         String url = "http://www.cwl.gov.cn/cwl_admin/kjxx/findDrawNotice?name=ssq&issueCount=100";
-
-
-
         JSONObject response = HttpUtils.get(url);
         JSONArray result = response.getJSONArray("result");
-
         for (int i = 0; i < result.size(); i++) {
             JSONObject o = result.getJSONObject(i);
             String date = o.getString("code");
             String red = o.getString("red");
             String blue = o.getString("blue");
-
             Ssq.insert(date, red, blue);
         }
+    }
 
+    @Test
+    public void  analyzer(){
+
+        Ssq.analyzer();
 
     }
 }
