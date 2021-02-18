@@ -51,7 +51,8 @@ public class SsqTest {
         JSONArray result = response.getJSONArray("result");
         for (int i = 0; i < result.size(); i++) {
             JSONObject o = result.getJSONObject(i);
-            String date = o.getString("code");
+            String date = o.getString("date");
+            date = date.substring(0,10);
             String red = o.getString("red");
             String blue = o.getString("blue");
             Ssq.insert(date, red, blue);
