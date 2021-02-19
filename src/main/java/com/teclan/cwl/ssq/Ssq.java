@@ -145,9 +145,29 @@ public class Ssq {
                 String pre = Objects.join(",",advice)+"-"+blue;// 预测开奖号码
                 String actully = openHis.get(i+1).get("code").toString();//下期实际开奖号码
 
-                String line = String.format("截止分析日期：%s，预测开奖号码:%s，下期 %s 实际开奖号码:%s\n\n",date,pre,openHis.get(i+1).get("date").toString(),actully);
+                String line = String.format("截止分析日期：%s，预测开奖号码:%s，下期 %s 实际开奖号码:%s，预测结果：%s \n\n",date,pre,openHis.get(i+1).get("date").toString(),actully,calculat(pre,actully));
                 FileUtils.write2File(filePath,line);
             }
+    }
+
+    private static String calculat(String pre,String actully){
+
+        String[] preRed = pre.split("-")[0].split(",");
+        String preBlue = pre.split("-")[1];
+
+        String[] actullyRed = actully.split("-")[0].split(",");
+        String actullyBlue = actully.split("-")[1];
+
+        int r = 0;
+        for(int i=0;i<preRed.length;i++){
+            for(int j=0;j<actullyRed.length;j++){
+                   if(preRed[i].equals(actullyRed[j])){
+                       r++;
+                   }
+            }
+        }
+
+        return String.format("红球命中个数：%s，篮球命中个数:%s",r,preBlue.equals(actullyBlue)?1:0);
     }
 
     private static final String SQL = "select * from (\n" +
