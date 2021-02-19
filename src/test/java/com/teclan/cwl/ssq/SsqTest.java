@@ -61,8 +61,11 @@ public class SsqTest {
 
     @Test
     public void  analyzer(){
-
         Ssq.analyzer();
+    }
 
+    @Test
+    public void his(){
+        Ssq.his();
     }
 }

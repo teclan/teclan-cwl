@@ -51,7 +51,8 @@ public class Ssq {
         String line = String.format("正在分析，样本：%s->%s 共 %s 期 ，各个序号出现频率最多的号码如下（前"+LIMIT+"）...\r\n",list.get(0).get("v"),list.get(1).get("v"),list.get(2).get("v"));
         LOGGER.info(line);
         FileUtils.write2File(path,line);
-        list =  DBFactory.getDb().findAll("select * from (\n" +
+
+        String sql = "select * from (\n" +
                 "\tselect t1.order,t1.code,max(time) time  from (\n" +
                 "\t select `order`,`code`,count(*) time from ssq_detail where `order` =1 group by `order`,`code` \n" +
                 "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,"+LIMIT+"\n" +
@@ -86,12 +87,14 @@ public class Ssq {
                 "\t select `order`,`code`,count(*) time from ssq_detail where `order` =6 group by `order`,`code` \n" +
                 "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,"+LIMIT+"\n" +
                 ") t6\n"+
-               "union\n" +
-              "select * from (\n" +
-              "\tselect t1.order,t1.code,max(time) time  from (\n" +
-              "\t select `order`,`code`,count(*) time from ssq_detail where `order` =7 group by `order`,`code` \n" +
-              "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,"+LIMIT+"\n" +
-              ") t7\n");
+                "union\n" +
+                "select * from (\n" +
+                "\tselect t1.order,t1.code,max(time) time  from (\n" +
+                "\t select `order`,`code`,count(*) time from ssq_detail where `order` =7 group by `order`,`code` \n" +
+                "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,"+LIMIT+"\n" +
+                ") t7\n";
+
+        list =  DBFactory.getDb().findAll(sql);
 
       List<String> advice = new ArrayList<String>();
       for(Map map:list){
@@ -99,10 +102,10 @@ public class Ssq {
           List<Map> rows;
           if(Integer.valueOf(7).equals(map.get("order"))){
               line = String.format("蓝球，序号：%s,号码：%s,出现次数:%s",map.get("order"),map.get("code"),map.get("time"));
-              rows =  DBFactory.getDb().findAll("select `date` from ssq_detail sd  where `code` ='"+map.get("code")+"' and `color` ='blue' and `order` = '"+map.get("order")+"'");
+              //rows =  DBFactory.getDb().findAll("select `date` from ssq_detail sd  where `code` ='"+map.get("code")+"' and `color` ='blue' and `order` = '"+map.get("order")+"'");
           }else {
               line = String.format("红球，序号：%s,号码：%s,出现次数:%s",map.get("order"),map.get("code"),map.get("time"));
-              rows =  DBFactory.getDb().findAll("select `date` from ssq_detail sd  where `code` ='"+map.get("code")+"' and `color` ='red' and `order` = '"+map.get("order")+"'");
+             // rows =  DBFactory.getDb().findAll("select `date` from ssq_detail sd  where `code` ='"+map.get("code")+"' and `color` ='red' and `order` = '"+map.get("order")+"'");
           }
 //          line +=" | 出现日期： ";
 //          for(Map m:rows){
@@ -121,4 +124,71 @@ public class Ssq {
         LOGGER.info(line);
         FileUtils.write2File(path,line);
     }
+
+
+    public static void his(){
+
+           String filePath = "分析历史.txt";
+           new File(filePath).delete();
+
+            List<Map> openHis = DBFactory.getDb().findAll("select `date`,`code` from ssq ");
+
+            for(int i=0;i<openHis.size()-1;i++){
+                Map map = openHis.get(i);
+                String date = map.get("date").toString();
+                List<Map> analyzer = DBFactory.getDb().findAll(String.format(SQL,date,date,date,date,date,date,date));
+                List<String> advice = new ArrayList<String>();
+                for(Map m:analyzer){
+                    advice.add(m.get("code").toString());
+                }
+                String blue = advice.remove(6);
+                String pre = Objects.join(",",advice)+"-"+blue;// 预测开奖号码
+                String actully = openHis.get(i+1).get("code").toString();//下期实际开奖号码
+
+                String line = String.format("截止分析日期：%s，预测开奖号码:%s，下期 %s 实际开奖号码:%s\n\n",date,pre,openHis.get(i+1).get("date").toString(),actully);
+                FileUtils.write2File(filePath,line);
+            }
+    }
+
+    private static final String SQL = "select * from (\n" +
+            "\tselect t1.order,t1.code,max(time) time  from (\n" +
+            "\t select `order`,`code`,count(*) time from ssq_detail where `order` =1 and `date` <='%s' group by `order`,`code` \n" +
+            "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,1\n" +
+            ") t1\n" +
+            "union\n" +
+            "select * from (\n" +
+            "\tselect t1.order,t1.code,max(time) time  from (\n" +
+            "\t select `order`,`code`,count(*) time from ssq_detail where `order` =2 and `date` <='%s' group by `order`,`code` \n" +
+            "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,1\n" +
+            ") t2\n" +
+            "union\n" +
+            "select * from (\n" +
+            "\tselect t1.order,t1.code,max(time) time  from (\n" +
+            "\t select `order`,`code`,count(*) time from ssq_detail where `order` =3 and `date` <='%s' group by `order`,`code` \n" +
+            "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,1\n" +
+            ") t3\n" +
+            "union\n" +
+            "select * from (\n" +
+            "\tselect t1.order,t1.code,max(time) time  from (\n" +
+            "\t select `order`,`code`,count(*) time from ssq_detail where `order` =4 and `date` <='%s' group by `order`,`code` \n" +
+            "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,1\n" +
+            ") t4\n" +
+            "union\n" +
+            "\tselect * from ( \n" +
+            "\tselect t1.order,t1.code,max(time) time  from (\n" +
+            "\t select `order`,`code`,count(*) time from ssq_detail where `order` =5 and `date` <='%s' group by `order`,`code` \n" +
+            "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,1\n" +
+            ") t5\n" +
+            "union\n" +
+            "select * from (\n" +
+            "\tselect t1.order,t1.code,max(time) time  from (\n" +
+            "\t select `order`,`code`,count(*) time from ssq_detail where `order` =6 and `date` <='%s' group by `order`,`code` \n" +
+            "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,1\n" +
+            ") t6\n" +
+            "union\n" +
+            "select * from (\n" +
+            "\tselect t1.order,t1.code,max(time) time  from (\n" +
+            "\t select `order`,`code`,count(*) time from ssq_detail where `order` =7 and `date` <='%s' group by `order`,`code` \n" +
+            "\t) t1  group by t1.order,t1.code,t1.time order by t1.time desc limit 0,1\n" +
+            ") t7\n";
 }
