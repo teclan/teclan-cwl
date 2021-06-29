@@ -42,6 +42,16 @@ public class Happy8Test {
             }
         }
 
+        public int compareO(V v){
+            if(this.o>v.o){
+                return 1;
+            }else if(this.o==v.o){
+                return 0;
+            }else{
+                return -1;
+            }
+        }
+
         public String toString(){
             return String.format("号码：%s，开奖次数：%s，最近五次开奖日期：%s、%s，%s，%s，%s",o,count,date1,date2,date3,date4,date5);
         }
@@ -57,19 +67,44 @@ public class Happy8Test {
             }
         });
 
-        sort(vs);
+        sortCount(vs);
+        String fileName = "快乐八开奖分析_开奖次数排序_"+SDF.format(new Date())+".txt";
+        out(fileName);
 
+        sortO(vs);
+        fileName = "快乐八开奖分析_号码排序_"+SDF.format(new Date())+".txt";
+        out(fileName);
+    }
+
+    private void out(String fileName){
         for(V v:vs){
             if(v==null){
                 continue;
             }
             LOGGER.info(v.toString());
-            FileUtils.write2File("快乐八开奖分析_"+SDF.format(new Date())+".txt",v.toString()+"\n");
+            FileUtils.write2File(fileName,v.toString()+"\n");
         }
-
     }
 
-    private void sort(V[] vs){
+    private void sortO(V[] vs){
+        for(int i=0;i<vs.length-1;i++){
+            if(vs[i]==null){
+                continue;
+            }
+            for(int j=i+1;j<vs.length-1;j++){
+                if(vs[j]==null){
+                    continue;
+                }
+                if(vs[j].compareO(vs[i])>0){
+                    V tmp = vs[i];
+                    vs[i] = vs[j];
+                    vs[j] = tmp;
+                }
+            }
+        }
+    }
+
+    private void sortCount(V[] vs){
         for(int i=0;i<vs.length-1;i++){
             if(vs[i]==null){
                 continue;
