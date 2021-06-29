@@ -64,7 +64,7 @@ public class Happy8Test {
                 continue;
             }
             LOGGER.info(v.toString());
-            FileUtils.write2File("快乐八开奖分析_"+SDF.format(new Date())+".txt",v.toString());
+            FileUtils.write2File("快乐八开奖分析_"+SDF.format(new Date())+".txt",v.toString()+"\n");
         }
 
     }
